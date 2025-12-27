@@ -4,6 +4,24 @@ A lightweight live-reload development server built with Bun. Serves static files
 
 ## Installation
 
+### Install Pre-built Binary (macOS)
+
+Download the latest release and install to `/usr/local/bin`:
+
+```bash
+curl -fsSL https://github.com/edwinencomienda/live-reloader/releases/latest/download/live-reloader -o /tmp/live-reloader && \
+chmod +x /tmp/live-reloader && \
+sudo mv /tmp/live-reloader /usr/local/bin/live-reloader
+```
+
+Verify the installation:
+
+```bash
+live-reloader --version
+```
+
+### Install from Source
+
 To install dependencies:
 
 ```bash
