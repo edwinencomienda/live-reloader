@@ -1,6 +1,7 @@
 import { serve } from "bun";
 import { watch } from "fs";
 import { resolve, sep } from "path";
+import { networkInterfaces } from "os";
 
 const VERSION = "0.1.2";
 
@@ -8,7 +9,7 @@ type ClientController = ReadableStreamDefaultController<Uint8Array>;
 const clients = new Set<ClientController>();
 const encoder = new TextEncoder();
 
-function parseArgs(): { port: number; rootDir: string } {
+function parseArgs(): { port: number; hostname: string; rootDir: string } {
   const argv = Bun.argv.slice(2); // skip `bun` and script path
 
   // Handle --version / -v early
@@ -18,6 +19,7 @@ function parseArgs(): { port: number; rootDir: string } {
   }
 
   let port = 3000;
+  let hostname = "0.0.0.0";
   let rootDir: string | undefined;
 
   for (let i = 0; i < argv.length; i++) {
@@ -39,16 +41,30 @@ function parseArgs(): { port: number; rootDir: string } {
       continue;
     }
 
+    // --host / -h
+    if (a === "--host" || a === "-h") {
+      const v = argv[i + 1];
+      if (v && !v.startsWith("-")) {
+        hostname = v;
+      }
+      i += 1;
+      continue;
+    }
+    if (a.startsWith("--host=")) {
+      hostname = a.slice("--host=".length);
+      continue;
+    }
+
     // Positional: first non-flag arg is the directory
     if (!a.startsWith("-") && !rootDir) {
       rootDir = a;
     }
   }
 
-  return { port, rootDir: resolve(rootDir ?? process.cwd()) };
+  return { port, hostname, rootDir: resolve(rootDir ?? process.cwd()) };
 }
 
-const { port, rootDir } = parseArgs();
+const { port, hostname, rootDir } = parseArgs();
 
 function now() {
   return new Date().toISOString();
@@ -62,10 +78,25 @@ function formatPath(url: URL) {
   return `${url.pathname}${url.search}`;
 }
 
+function getLocalIP(): string | undefined {
+  const interfaces = networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    const iface = interfaces[name];
+    if (!iface) continue;
+    for (const addr of iface) {
+      if (addr.family === "IPv4" && !addr.internal) {
+        return addr.address;
+      }
+    }
+  }
+  return undefined;
+}
+
 let server: ReturnType<typeof serve>;
 try {
   server = serve({
     port,
+    hostname,
     async fetch(req) {
       const url = new URL(req.url);
       const reqPath = formatPath(url);
@@ -192,6 +223,10 @@ es.onmessage=()=>location.reload();
 
 log(`live-reloader v${VERSION}`);
 log(`Serving "${rootDir}" at http://localhost:${server.port}`);
+const localIP = getLocalIP();
+if (localIP) {
+  log(`                    http://${localIP}:${server.port}`);
+}
 
 let reloadTimer: ReturnType<typeof setTimeout> | undefined;
 const watcher = watch(rootDir, { recursive: true }, (eventType, filename) => {
