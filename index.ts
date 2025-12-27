@@ -101,15 +101,35 @@ try {
 
       // Prevent path traversal: resolve against rootDir and ensure the result stays inside it.
       // We keep the leading "/" in pathname and prefix with "." so resolve treats it as relative.
-      const resolvedPath = resolve(rootDir, `.${pathname}`);
       const rootPrefix = rootDir.endsWith(sep) ? rootDir : rootDir + sep;
-      if (!(resolvedPath === rootDir || resolvedPath.startsWith(rootPrefix))) {
+
+      function isInsideRoot(p: string) {
+        return p === rootDir || p.startsWith(rootPrefix);
+      }
+
+      let resolvedPath = resolve(rootDir, `.${pathname}`);
+      if (!isInsideRoot(resolvedPath)) {
         const res = new Response("Forbidden", { status: 403 });
         log(`${req.method} ${reqPath} -> ${res.status}`);
         return res;
       }
 
-      const file = Bun.file(resolvedPath);
+      let file = Bun.file(resolvedPath);
+
+      // If file doesn't exist and path has no extension, try .html
+      if (!(await file.exists())) {
+        const hasExtension = pathname.includes(".") && !pathname.endsWith("/");
+        if (!hasExtension) {
+          const htmlPath = resolve(rootDir, `.${pathname}.html`);
+          if (isInsideRoot(htmlPath)) {
+            const htmlFile = Bun.file(htmlPath);
+            if (await htmlFile.exists()) {
+              resolvedPath = htmlPath;
+              file = htmlFile;
+            }
+          }
+        }
+      }
 
       if (!(await file.exists())) {
         const res = new Response("Not Found", { status: 404 });
