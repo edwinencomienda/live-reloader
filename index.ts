@@ -96,6 +96,13 @@ try {
         return res;
       }
 
+      // Redirect /index.html to / for cleaner URLs
+      if (pathname === "/index.html") {
+        const res = Response.redirect(url.origin + "/" + url.search, 301);
+        log(`${req.method} ${reqPath} -> ${res.status} (redirect to /)`);
+        return res;
+      }
+
       // Default document
       if (pathname === "/") pathname = "/index.html";
 
