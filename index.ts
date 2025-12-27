@@ -2,12 +2,20 @@ import { serve } from "bun";
 import { watch } from "fs";
 import { resolve, sep } from "path";
 
+const VERSION = "0.1.2";
+
 type ClientController = ReadableStreamDefaultController<Uint8Array>;
 const clients = new Set<ClientController>();
 const encoder = new TextEncoder();
 
 function parseArgs(): { port: number; rootDir: string } {
   const argv = Bun.argv.slice(2); // skip `bun` and script path
+
+  // Handle --version / -v early
+  if (argv.includes("--version") || argv.includes("-v")) {
+    console.log(`live-reloader v${VERSION}`);
+    process.exit(0);
+  }
 
   let port = 3000;
   let rootDir: string | undefined;
@@ -182,6 +190,7 @@ es.onmessage=()=>location.reload();
   process.exit(1);
 }
 
+log(`live-reloader v${VERSION}`);
 log(`Serving "${rootDir}" at http://localhost:${server.port}`);
 
 let reloadTimer: ReturnType<typeof setTimeout> | undefined;
