@@ -171,11 +171,11 @@ es.onmessage=()=>location.reload();
   });
 } catch (err) {
   const msg = err instanceof Error ? err.message : String(err);
-  if (
-    msg.includes("EADDRINUSE") ||
-    msg.toLowerCase().includes("address in use")
-  ) {
-    log(`Port ${port} is already in use. Is the server already running?`);
+  if (msg.includes("EADDRINUSE") || msg.toLowerCase().includes("in use")) {
+    log(`Port ${port} is already in use.`);
+    console.log(
+      `  Try using a different port: live-reloader --port ${port + 1}`
+    );
   } else {
     log(`Failed to start server: ${msg}`);
   }

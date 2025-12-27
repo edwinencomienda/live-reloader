@@ -44,4 +44,18 @@ Then run the executable directly:
 ./dist/live-reloader ./public --port 3000
 ```
 
+## Global Installation (macOS)
+
+To make the binary available globally:
+
+```bash
+sudo mv ./dist/live-reloader /usr/local/bin/live-reloader
+```
+
+Now you can use it from any directory:
+
+```bash
+live-reloader ./my-project --port 3000
+```
+
 This project was created using `bun init` in bun v1.3.5. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
