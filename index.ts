@@ -1,9 +1,9 @@
 import { serve } from "bun";
 import { watch } from "fs";
-import { resolve, sep } from "path";
 import { networkInterfaces } from "os";
+import { resolve, sep } from "path";
 
-const VERSION = "0.1.2";
+const VERSION = "0.1.3";
 
 type ClientController = ReadableStreamDefaultController<Uint8Array>;
 const clients = new Set<ClientController>();
