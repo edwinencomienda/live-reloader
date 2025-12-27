@@ -33,9 +33,6 @@ Build a standalone executable (includes Bun runtime, no dependencies needed):
 ```bash
 # Build executable
 bun run build
-
-# Build minified executable
-bun run build:minify
 ```
 
 Then run the executable directly:

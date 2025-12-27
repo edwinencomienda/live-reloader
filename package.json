@@ -5,8 +5,7 @@
   "private": true,
   "scripts": {
     "start": "bun run index.ts",
-    "build": "bun build index.ts --compile --outfile dist/live-reloader",
-    "build:minify": "bun build index.ts --compile --minify --outfile dist/live-reloader"
+    "build": "bun build index.ts --compile --minify --outfile dist/live-reloader"
   },
   "devDependencies": {
     "@types/bun": "latest"
