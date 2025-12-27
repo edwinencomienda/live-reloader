@@ -9,7 +9,7 @@ A lightweight live-reload development server built with Bun. Serves static files
 Download the latest release and install to `/usr/local/bin`:
 
 ```bash
-curl -fsSL https://github.com/edwinencomienda/live-reloader/releases/latest/download/live-reloader -o /tmp/live-reloader && \
+curl -fL --progress-bar https://github.com/edwinencomienda/live-reloader/releases/latest/download/live-reloader -o /tmp/live-reloader && \
 chmod +x /tmp/live-reloader && \
 sudo mv /tmp/live-reloader /usr/local/bin/live-reloader
 ```
