@@ -1,5 +1,9 @@
 # live-reloader
 
+A lightweight live-reload development server built with Bun. Serves static files and automatically reloads connected browsers when files change.
+
+## Installation
+
 To install dependencies:
 
 ```bash
