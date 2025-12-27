@@ -2,9 +2,9 @@
 
 A lightweight live-reload development server built with Bun. Serves static files and automatically reloads connected browsers when files change.
 
-## Installation
+## Binary Usage
 
-### Install Pre-built Binary (macOS)
+### Installation (macOS)
 
 Download the latest release and install to `/usr/local/bin`:
 
@@ -20,15 +20,31 @@ Verify the installation:
 live-reloader --version
 ```
 
-### Install from Source
+### Usage
 
-To install dependencies:
+```bash
+# Serve current directory
+live-reloader
+
+# Serve a specific directory
+live-reloader ./public
+
+# Change the port
+live-reloader --port 5173
+
+# Combine both
+live-reloader ./public --port 5173
+```
+
+## Development
+
+### Install Dependencies
 
 ```bash
 bun install
 ```
 
-## Usage
+### Run from Source
 
 ```bash
 # Serve current directory
@@ -39,17 +55,13 @@ bun run start ./public
 
 # Change the port
 bun run start --port 5173
-
-# Combine both
-bun run start ./public --port 5173
 ```
 
-## Build
+### Build
 
 Build a standalone executable (includes Bun runtime, no dependencies needed):
 
 ```bash
-# Build executable
 bun run build
 ```
 
@@ -59,18 +71,14 @@ Then run the executable directly:
 ./dist/live-reloader ./public --port 3000
 ```
 
-## Global Installation (macOS)
+### Global Installation from Build
 
-To make the binary available globally:
+To make the locally built binary available globally:
 
 ```bash
 sudo mv ./dist/live-reloader /usr/local/bin/live-reloader
 ```
 
-Now you can use it from any directory:
-
-```bash
-live-reloader ./my-project --port 3000
-```
+---
 
 This project was created using `bun init` in bun v1.3.5. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
