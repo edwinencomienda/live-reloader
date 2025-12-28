@@ -3,7 +3,7 @@ import { watch } from "fs";
 import { networkInterfaces } from "os";
 import { resolve, sep } from "path";
 
-const VERSION = "0.1.3";
+const VERSION = "0.1.4";
 
 type ClientController = ReadableStreamDefaultController<Uint8Array>;
 const clients = new Set<ClientController>();
@@ -226,10 +226,14 @@ console.log(`\x1b[36m═══════════════════�
 console.log(`\x1b[32m  live-reloader v${VERSION}\x1b[0m`);
 console.log(`\x1b[36m════════════════════════════════════════\x1b[0m`);
 console.log(`\x1b[33m📁 Root:\x1b[0m ${rootDir}`);
-console.log(`\x1b[33m🔗 Local:\x1b[0m   \x1b[1mhttp://localhost:${server.port}\x1b[0m`);
+console.log(
+  `\x1b[33m🔗 Local:\x1b[0m   \x1b[1mhttp://localhost:${server.port}\x1b[0m`
+);
 const localIP = getLocalIP();
 if (localIP) {
-  console.log(`\x1b[33m🔗 Network:\x1b[0m \x1b[1mhttp://${localIP}:${server.port}\x1b[0m`);
+  console.log(
+    `\x1b[33m🔗 Network:\x1b[0m \x1b[1mhttp://${localIP}:${server.port}\x1b[0m`
+  );
 }
 console.log(`\x1b[33m👀 Watching for changes...\x1b[0m`);
 console.log(`\x1b[36m════════════════════════════════════════\x1b[0m`);
