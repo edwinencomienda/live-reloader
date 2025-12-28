@@ -47,7 +47,10 @@ bun install
 ### Run from Source
 
 ```bash
-# Serve current directory
+# Development mode (hot reload on code changes)
+bun run dev
+
+# Standard mode
 bun run start
 
 # Serve a specific directory
