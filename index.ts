@@ -221,12 +221,19 @@ es.onmessage=()=>location.reload();
   process.exit(1);
 }
 
-log(`live-reloader v${VERSION}`);
-log(`Serving "${rootDir}" at http://localhost:${server.port}`);
+console.log("");
+console.log(`\x1b[36m════════════════════════════════════════\x1b[0m`);
+console.log(`\x1b[32m  live-reloader v${VERSION}\x1b[0m`);
+console.log(`\x1b[36m════════════════════════════════════════\x1b[0m`);
+console.log(`\x1b[33m📁 Root:\x1b[0m ${rootDir}`);
+console.log(`\x1b[33m🔗 Local:\x1b[0m   \x1b[1mhttp://localhost:${server.port}\x1b[0m`);
 const localIP = getLocalIP();
 if (localIP) {
-  log(`                    http://${localIP}:${server.port}`);
+  console.log(`\x1b[33m🔗 Network:\x1b[0m \x1b[1mhttp://${localIP}:${server.port}\x1b[0m`);
 }
+console.log(`\x1b[33m👀 Watching for changes...\x1b[0m`);
+console.log(`\x1b[36m════════════════════════════════════════\x1b[0m`);
+console.log("");
 
 let reloadTimer: ReturnType<typeof setTimeout> | undefined;
 const watcher = watch(rootDir, { recursive: true }, (eventType, filename) => {
