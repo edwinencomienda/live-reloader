@@ -1,4 +1,4 @@
-# live-reloader
+# Live Reloader
 
 A lightweight live-reload development server built with Bun. Serves static files and automatically reloads connected browsers when files change.
 
