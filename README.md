@@ -2,25 +2,23 @@
 
 A lightweight live-reload development server built with Bun. Serves static files and automatically reloads connected browsers when files change.
 
-## Binary Usage
+## Installation
 
-### Installation (macOS)
-
-Download the latest release and install to `/usr/local/bin`:
+Install globally using npm:
 
 ```bash
-curl -fL --progress-bar https://github.com/edwinencomienda/live-reloader/releases/latest/download/live-reloader -o /tmp/live-reloader && \
-chmod +x /tmp/live-reloader && \
-sudo mv /tmp/live-reloader /usr/local/bin/live-reloader
+npm install -g live-reloader
 ```
 
-Verify the installation:
+Or using bun:
 
 ```bash
-live-reloader --version
+bun install -g live-reloader
 ```
 
-### Usage
+**Note:** This package requires Bun to be installed on your system. [Install Bun](https://bun.sh/docs/installation) first if you haven't already.
+
+## Usage
 
 ```bash
 # Serve current directory
@@ -32,56 +30,61 @@ live-reloader ./public
 # Change the port
 live-reloader --port 5173
 
-# Combine both
-live-reloader ./public --port 5173
+# Custom host and port
+live-reloader ./public --host 0.0.0.0 --port 8080
+
+# Check version
+live-reloader --version
 ```
 
 ## Development
 
-### Install Dependencies
+### Prerequisites
+
+- [Bun](https://bun.sh/docs/installation) installed on your system
+
+### Getting Started
+
+Install dependencies:
 
 ```bash
 bun install
 ```
 
-### Run from Source
+Run in development mode (with hot reload):
 
 ```bash
-# Development mode (hot reload on code changes)
 bun run dev
-
-# Standard mode
-bun run start
-
-# Serve a specific directory
-bun run start ./public
-
-# Change the port
-bun run start --port 5173
 ```
 
-### Build
+Run from source:
 
-Build a standalone executable (includes Bun runtime, no dependencies needed):
+```bash
+bun run start
+
+# With options
+bun run start ./public --port 5173
+```
+
+### Building
+
+**Build for npm publishing:**
 
 ```bash
 bun run build
 ```
 
-Then run the executable directly:
+This creates `dist/index.js` and is automatically run before publishing.
+
+**Build standalone binary:**
 
 ```bash
-./dist/live-reloader ./public --port 3000
+bun run build:binary
 ```
 
-### Global Installation from Build
-
-To make the locally built binary available globally:
-
-```bash
-sudo mv ./dist/live-reloader /usr/local/bin/live-reloader
-```
+This creates a standalone executable at `dist/live-reloader` that includes the Bun runtime.
 
 ---
 
-This project was created using `bun init` in bun v1.3.5. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+Built with [Bun](https://bun.sh) 🚀
+

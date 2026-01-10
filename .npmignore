@@ -1,0 +1,32 @@
+# Development files
+node_modules/
+.vscode/
+.idea/
+*.log
+*.swp
+*.swo
+*~
+
+# Build artifacts
+dist/
+build/
+
+# Test files
+test/
+tests/
+*.test.ts
+*.spec.ts
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Git
+.git/
+.gitignore
+
+# Development configs
+tsconfig.json
+.prettierrc
+.eslintrc*

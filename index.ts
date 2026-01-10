@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { serve } from "bun";
 import { watch } from "fs";
 import { networkInterfaces } from "os";

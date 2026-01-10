@@ -1,17 +1,46 @@
 {
   "name": "live-reloader",
+  "version": "0.1.4",
+  "description": "A fast, simple live-reload development server with file watching",
+  "author": "Edwin Encomienda",
+  "license": "MIT",
+  "keywords": [
+    "live-reload",
+    "dev-server",
+    "file-watcher",
+    "development",
+    "hot-reload",
+    "bun",
+    "cli"
+  ],
+  "bin": {
+    "live-reloader": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "module": "index.ts",
   "type": "module",
-  "private": true,
   "scripts": {
     "dev": "bun run --hot index.ts",
     "start": "bun run index.ts",
-    "build": "bun build index.ts --compile --minify --outfile dist/live-reloader"
+    "build": "bun build index.ts --outfile dist/index.js --target bun",
+    "build:binary": "bun build index.ts --compile --minify --outfile dist/live-reloader",
+    "prepublishOnly": "bun run build"
   },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/live-reloader"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/live-reloader/issues"
+  },
+  "homepage": "https://github.com/yourusername/live-reloader#readme"
 }
