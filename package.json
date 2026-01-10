@@ -37,10 +37,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/live-reloader"
+    "url": "git+https://github.com/edwinencomienda/live-reloader.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/live-reloader/issues"
+    "url": "https://github.com/edwinencomienda/live-reloader/issues"
   },
-  "homepage": "https://github.com/yourusername/live-reloader#readme"
+  "homepage": "https://github.com/edwinencomienda/live-reloader#readme"
 }
