@@ -1,6 +1,6 @@
 {
   "name": "@edwinencomienda/live-reloader",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A fast, simple live-reload development server with file watching",
   "author": "Edwin Encomienda",
   "license": "MIT",
