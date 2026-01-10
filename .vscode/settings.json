@@ -1,0 +1,7 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "npm version": true,
+        "npm publish": true,
+        "git push": true
+    }
+}
