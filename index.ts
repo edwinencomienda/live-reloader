@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { serve } from "bun";
-import { watch } from "fs";
+import { existsSync, watch } from "fs";
 import { networkInterfaces } from "os";
 import { resolve, sep } from "path";
 
@@ -67,6 +67,20 @@ function parseArgs(): { port: number; hostname: string; rootDir: string } {
 
 const { port, hostname, rootDir } = parseArgs();
 
+// Verify the directory exists
+if (!existsSync(rootDir)) {
+  console.log("");
+  console.log(`\x1b[31m════════════════════════════════════════\x1b[0m`);
+  console.log(`\x1b[31m  ❌ Directory Not Found\x1b[0m`);
+  console.log(`\x1b[31m════════════════════════════════════════\x1b[0m`);
+  console.log(`\x1b[33m📁 Path:\x1b[0m ${rootDir}`);
+  console.log("");
+  console.log(`  The specified directory does not exist.`);
+  console.log(`  Please check the path and try again.`);
+  console.log("");
+  process.exit(1);
+}
+
 function now() {
   return new Date().toISOString();
 }
@@ -94,132 +108,144 @@ function getLocalIP(): string | undefined {
 }
 
 let server: ReturnType<typeof serve>;
-try {
-  server = serve({
-    port,
-    hostname,
-    async fetch(req) {
-      const url = new URL(req.url);
-      const reqPath = formatPath(url);
+let finalPort = port;
+let attempts = 0;
+const maxAttempts = 10;
 
-      if (url.pathname === "/__reload") {
-        let controllerRef: ClientController | null = null;
-        const stream = new ReadableStream<Uint8Array>({
-          start(controller) {
-            controllerRef = controller;
-            clients.add(controller);
-            controller.enqueue(encoder.encode("retry: 1000\n\n"));
-            log(`SSE connected (clients=${clients.size})`);
-          },
-          cancel() {
-            if (controllerRef) clients.delete(controllerRef);
-            log(`SSE disconnected (clients=${clients.size})`);
-          },
-        });
-        const res = new Response(stream, {
-          headers: {
-            "Content-Type": "text/event-stream; charset=utf-8",
-            "Cache-Control": "no-cache, no-transform",
-            Connection: "keep-alive",
-          },
-        });
-        log(`${req.method} ${reqPath} -> ${res.status}`);
-        return res;
-      }
+while (attempts < maxAttempts) {
+  try {
+    server = serve({
+      port: finalPort,
+      hostname,
+      async fetch(req) {
+        const url = new URL(req.url);
+        const reqPath = formatPath(url);
 
-      let pathname: string;
-      try {
-        pathname = decodeURIComponent(url.pathname);
-      } catch {
-        const res = new Response("Bad Request", { status: 400 });
-        log(`${req.method} ${reqPath} -> ${res.status}`);
-        return res;
-      }
+        if (url.pathname === "/__reload") {
+          let controllerRef: ClientController | null = null;
+          const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+              controllerRef = controller;
+              clients.add(controller);
+              controller.enqueue(encoder.encode("retry: 1000\n\n"));
+              log(`SSE connected (clients=${clients.size})`);
+            },
+            cancel() {
+              if (controllerRef) clients.delete(controllerRef);
+              log(`SSE disconnected (clients=${clients.size})`);
+            },
+          });
+          const res = new Response(stream, {
+            headers: {
+              "Content-Type": "text/event-stream; charset=utf-8",
+              "Cache-Control": "no-cache, no-transform",
+              Connection: "keep-alive",
+            },
+          });
+          log(`${req.method} ${reqPath} -> ${res.status}`);
+          return res;
+        }
 
-      // Redirect /index.html to / for cleaner URLs
-      if (pathname === "/index.html") {
-        const res = Response.redirect(url.origin + "/" + url.search, 301);
-        log(`${req.method} ${reqPath} -> ${res.status} (redirect to /)`);
-        return res;
-      }
+        let pathname: string;
+        try {
+          pathname = decodeURIComponent(url.pathname);
+        } catch {
+          const res = new Response("Bad Request", { status: 400 });
+          log(`${req.method} ${reqPath} -> ${res.status}`);
+          return res;
+        }
 
-      // Default document
-      if (pathname === "/") pathname = "/index.html";
+        // Redirect /index.html to / for cleaner URLs
+        if (pathname === "/index.html") {
+          const res = Response.redirect(url.origin + "/" + url.search, 301);
+          log(`${req.method} ${reqPath} -> ${res.status} (redirect to /)`);
+          return res;
+        }
 
-      // Prevent path traversal: resolve against rootDir and ensure the result stays inside it.
-      // We keep the leading "/" in pathname and prefix with "." so resolve treats it as relative.
-      const rootPrefix = rootDir.endsWith(sep) ? rootDir : rootDir + sep;
+        // Default document
+        if (pathname === "/") pathname = "/index.html";
 
-      function isInsideRoot(p: string) {
-        return p === rootDir || p.startsWith(rootPrefix);
-      }
+        // Prevent path traversal: resolve against rootDir and ensure the result stays inside it.
+        // We keep the leading "/" in pathname and prefix with "." so resolve treats it as relative.
+        const rootPrefix = rootDir.endsWith(sep) ? rootDir : rootDir + sep;
 
-      let resolvedPath = resolve(rootDir, `.${pathname}`);
-      if (!isInsideRoot(resolvedPath)) {
-        const res = new Response("Forbidden", { status: 403 });
-        log(`${req.method} ${reqPath} -> ${res.status}`);
-        return res;
-      }
+        function isInsideRoot(p: string) {
+          return p === rootDir || p.startsWith(rootPrefix);
+        }
 
-      let file = Bun.file(resolvedPath);
+        let resolvedPath = resolve(rootDir, `.${pathname}`);
+        if (!isInsideRoot(resolvedPath)) {
+          const res = new Response("Forbidden", { status: 403 });
+          log(`${req.method} ${reqPath} -> ${res.status}`);
+          return res;
+        }
 
-      // If file doesn't exist and path has no extension, try .html
-      if (!(await file.exists())) {
-        const hasExtension = pathname.includes(".") && !pathname.endsWith("/");
-        if (!hasExtension) {
-          const htmlPath = resolve(rootDir, `.${pathname}.html`);
-          if (isInsideRoot(htmlPath)) {
-            const htmlFile = Bun.file(htmlPath);
-            if (await htmlFile.exists()) {
-              resolvedPath = htmlPath;
-              file = htmlFile;
+        let file = Bun.file(resolvedPath);
+
+        // If file doesn't exist and path has no extension, try .html
+        if (!(await file.exists())) {
+          const hasExtension = pathname.includes(".") && !pathname.endsWith("/");
+          if (!hasExtension) {
+            const htmlPath = resolve(rootDir, `.${pathname}.html`);
+            if (isInsideRoot(htmlPath)) {
+              const htmlFile = Bun.file(htmlPath);
+              if (await htmlFile.exists()) {
+                resolvedPath = htmlPath;
+                file = htmlFile;
+              }
             }
           }
         }
-      }
 
-      if (!(await file.exists())) {
-        const res = new Response("Not Found", { status: 404 });
-        log(`${req.method} ${reqPath} -> ${res.status}`);
-        return res;
-      }
+        if (!(await file.exists())) {
+          const res = new Response("Not Found", { status: 404 });
+          log(`${req.method} ${reqPath} -> ${res.status}`);
+          return res;
+        }
 
-      if (file.type.startsWith("text/html")) {
-        const t = await file.text();
-        const injected = `<script>
+        if (file.type.startsWith("text/html")) {
+          const t = await file.text();
+          const injected = `<script>
 const es=new EventSource('/__reload');
 es.onmessage=()=>location.reload();
 </script>`;
 
-        const body = t.includes("</body>")
-          ? t.replace("</body>", `${injected}</body>`)
-          : `${t}\n${injected}\n`;
+          const body = t.includes("</body>")
+            ? t.replace("</body>", `${injected}</body>`)
+            : `${t}\n${injected}\n`;
 
-        const res = new Response(body, {
-          headers: {
-            "Content-Type": file.type || "text/html; charset=utf-8",
-          },
-        });
+          const res = new Response(body, {
+            headers: {
+              "Content-Type": file.type || "text/html; charset=utf-8",
+            },
+          });
+          log(`${req.method} ${reqPath} -> ${res.status} (${resolvedPath})`);
+          return res;
+        }
+
+        const res = new Response(file);
         log(`${req.method} ${reqPath} -> ${res.status} (${resolvedPath})`);
         return res;
+      },
+    });
+    // Success! Break out of the loop
+    break;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("EADDRINUSE") || msg.toLowerCase().includes("in use")) {
+      attempts++;
+      if (attempts >= maxAttempts) {
+        log(`Unable to find an available port after trying ports ${port}-${finalPort}.`);
+        console.log(`  All ports are in use. Please specify a different port with --port.`);
+        process.exit(1);
       }
-
-      const res = new Response(file);
-      log(`${req.method} ${reqPath} -> ${res.status} (${resolvedPath})`);
-      return res;
-    },
-  });
-} catch (err) {
-  const msg = err instanceof Error ? err.message : String(err);
-  if (msg.includes("EADDRINUSE") || msg.toLowerCase().includes("in use")) {
-    log(`Port ${port} is already in use.`);
-    console.log(
-      `  Try using a different port: live-reloader --port ${port + 1}`
-    );
-  } else {
-    log(`Failed to start server: ${msg}`);
+      finalPort++;
+      log(`Port ${finalPort - 1} is in use, trying port ${finalPort}...`);
+    } else {
+      log(`Failed to start server: ${msg}`);
+      process.exit(1);
+    }
   }
-  process.exit(1);
 }
 
 console.log("");
@@ -235,6 +261,9 @@ if (localIP) {
   console.log(
     `\x1b[33m🔗 Network:\x1b[0m \x1b[1mhttp://${localIP}:${server.port}\x1b[0m`
   );
+}
+if (finalPort !== port) {
+  console.log(`\x1b[33m⚠️  Note:\x1b[0m Port ${port} was in use, using port ${finalPort} instead`);
 }
 console.log(`\x1b[33m👀 Watching for changes...\x1b[0m`);
 console.log(`\x1b[36m════════════════════════════════════════\x1b[0m`);
