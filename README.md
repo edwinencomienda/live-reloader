@@ -7,13 +7,13 @@ A lightweight live-reload development server built with Bun. Serves static files
 Install globally using npm:
 
 ```bash
-npm install -g live-reloader
+npm install -g @edwinencomienda/live-reloader
 ```
 
 Or using bun:
 
 ```bash
-bun install -g live-reloader
+bun install -g @edwinencomienda/live-reloader
 ```
 
 **Note:** This package requires Bun to be installed on your system. [Install Bun](https://bun.sh/docs/installation) first if you haven't already.
