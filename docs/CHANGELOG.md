@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-01-10
+
 ### Added
 - Automatic port fallback mechanism: when the requested port is in use, the server now automatically tries up to 10 alternative ports (e.g., if 3000 is in use, tries 3001, 3002, etc.)
 - Directory validation with formatted error message: displays a clear, color-coded error banner when the specified directory does not exist
@@ -20,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Server no longer exits immediately when port is in use; instead tries alternative ports
 - Better handling of EADDRINUSE errors with informative messages
 
-## [0.1.4] - 2026-01-10
+## [1.0.3] - 2026-01-10
 
 ### Initial features
 - Live reloading development server for static HTML files

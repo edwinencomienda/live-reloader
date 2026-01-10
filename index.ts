@@ -4,7 +4,7 @@ import { existsSync, watch } from "fs";
 import { networkInterfaces } from "os";
 import { resolve, sep } from "path";
 
-const VERSION = "0.1.4";
+const VERSION = "1.1.0";
 
 type ClientController = ReadableStreamDefaultController<Uint8Array>;
 const clients = new Set<ClientController>();
