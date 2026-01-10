@@ -18,6 +18,20 @@ bun install -g @edwinencomienda/live-reloader
 
 **Note:** This package requires Bun to be installed on your system. [Install Bun](https://bun.sh/docs/installation) first if you haven't already.
 
+### Updating
+
+To update to the latest version:
+
+```bash
+npm update -g @edwinencomienda/live-reloader
+```
+
+Or with bun:
+
+```bash
+bun update -g @edwinencomienda/live-reloader
+```
+
 ## Usage
 
 ```bash
