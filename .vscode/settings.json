@@ -3,6 +3,7 @@
         "npm version": true,
         "npm publish": true,
         "git push": true,
-        "git add": true
+        "git add": true,
+        "git commit": true
     }
 }
