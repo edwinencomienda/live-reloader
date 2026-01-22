@@ -4,7 +4,7 @@ import { existsSync, watch } from "fs";
 import { networkInterfaces } from "os";
 import { resolve, sep } from "path";
 
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 
 type ClientController = ReadableStreamDefaultController<Uint8Array>;
 const clients = new Set<ClientController>();
@@ -121,6 +121,21 @@ while (attempts < maxAttempts) {
         const url = new URL(req.url);
         const reqPath = formatPath(url);
 
+        // Handle CORS preflight requests
+        if (req.method === "OPTIONS") {
+          const res = new Response(null, {
+            status: 204,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, OPTIONS",
+              "Access-Control-Allow-Headers": "Content-Type",
+              "Access-Control-Max-Age": "86400",
+            },
+          });
+          log(`${req.method} ${reqPath} -> ${res.status}`);
+          return res;
+        }
+
         if (url.pathname === "/__reload") {
           let controllerRef: ClientController | null = null;
           const stream = new ReadableStream<Uint8Array>({
@@ -140,6 +155,9 @@ while (attempts < maxAttempts) {
               "Content-Type": "text/event-stream; charset=utf-8",
               "Cache-Control": "no-cache, no-transform",
               Connection: "keep-alive",
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, OPTIONS",
+              "Access-Control-Allow-Headers": "Content-Type",
             },
           });
           log(`${req.method} ${reqPath} -> ${res.status}`);
@@ -150,7 +168,10 @@ while (attempts < maxAttempts) {
         try {
           pathname = decodeURIComponent(url.pathname);
         } catch {
-          const res = new Response("Bad Request", { status: 400 });
+          const res = new Response("Bad Request", {
+            status: 400,
+            headers: { "Access-Control-Allow-Origin": "*" },
+          });
           log(`${req.method} ${reqPath} -> ${res.status}`);
           return res;
         }
@@ -175,7 +196,10 @@ while (attempts < maxAttempts) {
 
         let resolvedPath = resolve(rootDir, `.${pathname}`);
         if (!isInsideRoot(resolvedPath)) {
-          const res = new Response("Forbidden", { status: 403 });
+          const res = new Response("Forbidden", {
+            status: 403,
+            headers: { "Access-Control-Allow-Origin": "*" },
+          });
           log(`${req.method} ${reqPath} -> ${res.status}`);
           return res;
         }
@@ -198,7 +222,10 @@ while (attempts < maxAttempts) {
         }
 
         if (!(await file.exists())) {
-          const res = new Response("Not Found", { status: 404 });
+          const res = new Response("Not Found", {
+            status: 404,
+            headers: { "Access-Control-Allow-Origin": "*" },
+          });
           log(`${req.method} ${reqPath} -> ${res.status}`);
           return res;
         }
@@ -217,13 +244,18 @@ es.onmessage=()=>location.reload();
           const res = new Response(body, {
             headers: {
               "Content-Type": file.type || "text/html; charset=utf-8",
+              "Access-Control-Allow-Origin": "*",
             },
           });
           log(`${req.method} ${reqPath} -> ${res.status} (${resolvedPath})`);
           return res;
         }
 
-        const res = new Response(file);
+        const res = new Response(file, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        });
         log(`${req.method} ${reqPath} -> ${res.status} (${resolvedPath})`);
         return res;
       },

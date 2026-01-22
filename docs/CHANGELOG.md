@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-01-22
+
+### Added
+- CORS (Cross-Origin Resource Sharing) support: server now accepts requests from any origin
+- OPTIONS preflight request handling for CORS compliance
+- Access-Control headers on all responses (SSE endpoint, HTML files, static files, and error responses)
+
 ## [1.1.0] - 2026-01-10
 
 ### Added
