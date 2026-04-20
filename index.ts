@@ -4,7 +4,7 @@ import { existsSync, watch } from "fs";
 import { networkInterfaces } from "os";
 import { resolve, sep } from "path";
 
-const VERSION = "1.2.0";
+const VERSION = "1.2.1";
 
 type ClientController = ReadableStreamDefaultController<Uint8Array>;
 const clients = new Set<ClientController>();
@@ -304,6 +304,12 @@ console.log("");
 let reloadTimer: ReturnType<typeof setTimeout> | undefined;
 const watcher = watch(rootDir, { recursive: true }, (eventType, filename) => {
   const label = filename ? String(filename) : "(unknown file)";
+
+  // Skip changes in .git directory
+  if (label === ".git" || label.startsWith(".git/") || label.startsWith(".git\\")) {
+    return;
+  }
+
   log(`fs.watch ${eventType}: ${label}`);
 
   if (reloadTimer) clearTimeout(reloadTimer);
